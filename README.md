@@ -47,9 +47,9 @@ It is this HTTP Request Payload that we need to customize that will allow us to 
 * An array of team members that the bot will populate the room with, and
 * An array of events that have triggered the alert HTTP Request
 
-The team members are pretty easily populated, but how do we get events?  Well, fortunately, the gurus at AppD allow scripting of the [HTTP Template Request Body](https://docs.appdynamics.com/display/PRO44/HTTP+Request+Actions+and+Templates#HTTPRequestActionsandTemplates-CreateorModifyanHTTPRequestTemplate) via [Apache Velocity] (http://velocity.apache.org).  In a nutshell, the Apache Velocity Templating language allows us to populate the contents of the request body at alert time so that we have the most up to date contextual information possible.
+The team members are pretty easily populated, but how do we get events?  Well, fortunately, the gurus at AppD allow scripting of the [HTTP Template Request Body](https://docs.appdynamics.com/display/PRO44/HTTP+Request+Actions+and+Templates#HTTPRequestActionsandTemplates-CreateorModifyanHTTPRequestTemplate) via [Apache Velocity](http://velocity.apache.org).  In a nutshell, the Apache Velocity Templating language allows us to populate the contents of the request body at alert time so that we have the most up to date contextual information possible.
 
-here is the body snippet for the payload template
+here is the body snippet for the payload template:
 
 ```json
 {
