@@ -1,6 +1,6 @@
 # AppDynamics Triage Bot
 
-Recently I've had the opportunity to get to work with the powerful tools that AppDynamics has to offer.  In addition to mapping out your application flow, business transaction scoring and correlation, AppDynamics has a [powerful monitoring and alert system](https://blog.appdynamics.com/product/proactive-monitoring-and-alerting-with-appdynamics/).  Like other monitoring systems you are able to send out SMS or email alerts based upon various criteria.  What is really cool is that the App D controller can fire HTTP requests at a web server!  This opens up a variety of use cases like a Cisco Spark Bot that creates a Triage Spark Room complete with pre-populating team room members, posting links and logs and other information necessary to hit the ground running in triaging the issue.
+Recently I've had the opportunity to get to work with the powerful tools that [AppDynamics](https://www.appdynamics.com) has to offer.  In addition to automatically and dynamically mappig out your application flow, business transaction scoring and correlation, AppDynamics has a [powerful monitoring and alert system](https://blog.appdynamics.com/product/proactive-monitoring-and-alerting-with-appdynamics/).  Like other monitoring systems you are able to send out SMS or email alerts based upon various criteria.  What is really cool is that the App D controller can fire HTTP requests at a web server!  This opens up a variety of use cases like a Cisco Spark Bot that creates a Triage Spark Room complete with pre-populating team room members, posting links and logs and other information necessary to hit the ground running in triaging the issue.
 
 ## Problem meet Triage Bot
 
@@ -27,7 +27,13 @@ Here is a high-level view of the call flow.
 
 So let's dive into how this done.
 
-In order for the monitor and alert functionality to work on AppD, you need to create a Policy that defines the criteria that you want to monitor and the action that you want to take.  The monitoring criteria can be performance metrics, health rules related to business transaction performance or specific events like a server restart.  In order to take action with an HTTP Request, we first have to define an HTTP Request Template.  With the policy and HTTP Request defined for our case, when a server that we are monitoring restarts, the AppD controller will fire an HTTP Request to our AppD Triage Bot.
+In order for the monitor and alert functionality to work on AppD, you need to create a Policy that defines the criteria that you want to monitor and the action that you want to take.  
+
+![Policy Creation in AppDynamics](docs/appd_policy_settings.png)
+
+The monitoring criteria can be performance metrics, health rules related to business transaction performance or specific events like a server restart.  It can really be anything you like.  For example, say some of your business transactions start slowing down to unacceptable level.  Trigger the alert!  For the sake of simplicity, I've decided to go with a simple server restart.
+
+In order to take action with an HTTP Request, we first have to define an HTTP Request Template.  With the policy and HTTP Request defined for our case, when a server that we are monitoring restarts, the AppD controller will fire an HTTP Request to our AppD Triage Bot.
 
 Creating an HTTP Request Template is fairly straight forward and I'd recommend checking out the documentation for a quick primer.  The main things you will need to fill out in the form includes:
 * Name of the Template,
