@@ -6,7 +6,7 @@ Recently I've had the opportunity to get to work with the powerful tools that Ap
 
 I already have AppD monitoring a couple of my own Spark Bots, so let's setup App Dynamics and a Spark Bot to do the following in case a server I'm monitoring restarts.  Here is a high level view of the architecture.
 
-architecture image
+![Spark-AppD-Triage Bot High Level Architecture](docs/appd-spark-architecture.png)
 
 When AppD discovers a restart, I would like the following to happen:
 1. AppD send an HTTP request to a Spark Bot we'll call AppD Triage Bot.  The body of the request should include:
@@ -231,3 +231,6 @@ def build_triage_room(appd_request_json):
     print("{}, build_triage_room end".format(date_time))
 
 ```
+
+Here is a screenshot of the finished product!
+![Spark Bot created triage room](docs/spark_screenshot.png)
