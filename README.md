@@ -136,7 +136,7 @@ pretty simple.  We take the HTTP request, verify it's coming from our AppD contr
 2. Populate the room with people listed in the *triageEmailList* json array in the request payload above, and
 3. Send a summary of the event that needs triaging to the room.  We will want to include an HTML deep link back to the event so that users can dive right in and start troubleshooting.  
 
-Now let's take a look at how we build the room:
+Now let's take a look at how we do this in code:
 
 ```python
 def build_triage_room(appd_request_json):
