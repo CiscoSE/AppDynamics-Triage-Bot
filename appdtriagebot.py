@@ -32,7 +32,6 @@ import datetime as dt
 
 app = Flask(__name__)
 
-
 def verify_incoming_request(request):
 
     date_time = dt.datetime.now()
@@ -51,6 +50,57 @@ def verify_incoming_request(request):
         print("{}:   Request DID NOT HAVE the appropriate token for the appdtriagebot.".format(date_time))
 
     return False
+
+def populate_spark_room_members(room_id, bot_token, email_list):
+    # Use the Spark Memberships API to add people to the room.
+    the_url = "https://api.ciscospark.com/v1/memberships"
+
+    # Iterage through the mail list.
+    for email_address in email_list:
+        message_json = {"roomId": room_id,
+                        "personEmail": email_address}
+        date_time = dt.datetime.now()
+        print("{},   sending request to add folks to the room".format(date_time))
+        message_response = requests.post(the_url, json=message_json, verify=True,
+                                         headers={'Authorization': 'Bearer {}'.format(bot_token), 'Accept':
+                                             'application/json'})
+        if message_response.status_code == 200:
+            date_time = dt.datetime.now()
+            print("{}: Successfully added to the room!".format(date_time))
+        else:
+            date_time = dt.datetime.now()
+            print("{}: DID NOT Successfully add a person to the room!.  Status Code: {}".format(date_time,
+                                                                                                message_response.status_code))
+
+def populate_spark_room_message(room_id, bot_token, events):
+
+    event = events[0]
+
+    app_name = event['app']
+    event_name = event['name']
+    event_summary = event['message']
+    event_deep_link_url = event['deeplink']
+
+    post_url = "https://api.ciscospark.com/v1/messages"
+
+    # Going crazy with the mark down, but the message should look good.
+    # We could also potentially post other stuff here, like logs or similar.  But you get the idea.
+    post_data = {'roomId': room_id,
+                 'markdown': "## **{}** Had a Major Application Event!! \n\n * **Application Event:**  _{}_\n\n* **Event Summary:** {}\n\n * The event can be found here: {}".format(
+                     app_name, event_name, event_summary, event_deep_link_url)}
+
+    request_response_results = requests.post(post_url, json=post_data, headers={"Accept": "application/json",
+                                                                                "Content-Type": "application/json",
+                                                                                "Authorization": "Bearer {}".format(
+                                                                                    bot_token)})
+
+    if request_response_results.status_code == 200:
+        date_time = dt.datetime.now()
+        print("{}: Successfully posted the event to the room!".format(date_time))
+    else:
+        date_time = dt.datetime.now()
+        print("{}: DID NOT Successfully post to the room!.  Status Code: {}".format(date_time,
+                                                                                    request_response_results.status_code))
 
 
 def build_triage_room(appd_request_json):
@@ -92,23 +142,7 @@ def build_triage_room(appd_request_json):
 
         email_list = appd_request_json['triageEmailList']
 
-        # Use the Spark Memberships API to add people to the room.
-        the_url = "https://api.ciscospark.com/v1/memberships"
-
-        # Iterage through the mail list.
-        for email_address in email_list:
-            message_json = {"roomId": room_id,
-                            "personEmail": email_address}
-            print("{},   sending request to add folks to the room".format(date_time))
-            message_response = requests.post(the_url, json=message_json, verify=True,
-                                             headers={'Authorization': 'Bearer {}'.format(bot_token), 'Accept':
-                                                 'application/json'})
-            if message_response.status_code == 200:
-                date_time = dt.datetime.now()
-                print("{}: Successfully added to the room!".format(date_time))
-            else:
-                date_time = dt.datetime.now()
-                print("{}: DID NOT Successfully add a person to the room!.  Status Code: {}".format(date_time, message_response.status_code))
+        populate_spark_room_members(room_id, bot_token, email_list)
 
         # Retrieve the event that caused this and post it as a message to the room
         # Post to the room
@@ -116,31 +150,9 @@ def build_triage_room(appd_request_json):
         print("{}: Posting event info to the room".format(date_time))
 
         events = appd_request_json['events']
-        event = appd_request_json['events'][0]
+        populate_spark_room_message(room_id, bot_token, events)
 
-        app_name = event['app']
-        event_name = event['name']
-        event_summary = event['message']
-        event_deep_link_url = event['deeplink']
 
-        post_url = "https://api.ciscospark.com/v1/messages"
-
-        # Going crazy with the mark down, but the message should look good.
-        # We could also potentially post other stuff here, like logs or similar.  But you get the idea.
-        post_data = {'roomId': room_id, 'markdown': "## **{}** Had a Major Application Event!! \n\n * **Application Event:**  _{}_\n\n* **Event Summary:** {}\n\n * The event can be found here: {}".format(app_name, event_name, event_summary, event_deep_link_url)}
-
-        request_response_results = requests.post(post_url, json=post_data, headers={"Accept": "application/json",
-                                                                                    "Content-Type": "application/json",
-                                                                                    "Authorization": "Bearer {}".format(
-                                                                                        bot_token)})
-
-        if request_response_results.status_code == 200:
-            date_time = dt.datetime.now()
-            print("{}: Successfully posted the event to the room!".format(date_time))
-        else:
-            date_time = dt.datetime.now()
-            print("{}: DID NOT Successfully post to the room!.  Status Code: {}".format(date_time,
-                                                                                        message_response.status_code))
 
     else:
         date_time = dt.datetime.now()
