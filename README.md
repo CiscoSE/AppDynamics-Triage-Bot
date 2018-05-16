@@ -131,7 +131,12 @@ if __name__ == "__main__":
     app.run(host='0.0.0.0')
 ```
 
-pretty simple.  We take the HTTP request, verify it's coming from out AppD controller via a token embedded in the request and then fire a function, build_triage_room, that takes the request payload and builds the room.  Now let's take a look at how we build the room:
+pretty simple.  We take the HTTP request, verify it's coming from our AppD controller via a token embedded in the request and then fire a function, build_triage_room, that takes the request payload and builds the room.  We will do the following:
+1. Create the Spark Space with an appropriate name.
+2. Populate the room with people listed in the *triageEmailList* json array in the request payload above, and
+3. Send a summary of the event that needs triaging to the room.  We will want to include an HTML deep link back to the event so that users can dive right in and start troubleshooting.  
+
+Now let's take a look at how we build the room:
 
 ```python
 def build_triage_room(appd_request_json):
