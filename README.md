@@ -198,5 +198,7 @@ def build_triage_room(appd_request_json):
 
 ```
 
+To test it out, we need to trigger a restart of the server and generate traffic to the app that is being monitored.  Once AppD starts processing those business transations, it will fire the HTTP request to our triage bot.
+
 Here is a screenshot of the finished product!
 ![Spark Bot created triage room](docs/spark_screenshot.png)
