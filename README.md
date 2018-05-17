@@ -29,7 +29,7 @@ So let's dive into how this done.
 
 In order for the monitor and alert functionality to work on AppDynamics, you need to create a Policy that defines the criteria that you want to monitor and the action that you want to take.  In order to do this, log into your controller and click the "Alert &amp; Respond" Tab.  Once you are on the "Alert &amp; Respond" Tab, you will want to choose your application from the drop down menu and then click "Policies".  This will take you to a list where you can edit, delete and create new policies.
 
-![Breadcrumbs to the Policy Setting](doc/AppD-Spark-Policy-Breadcrumb.png)
+![Breadcrumbs to the Policy Setting](docs/AppD-Spark-Policy-Breadcrumb.png)
 
 If you have not already done so, create/add a policy.
 
