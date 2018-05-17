@@ -27,11 +27,15 @@ Here is a high-level view of the call flow.
 
 So let's dive into how this done.
 
-In order for the monitor and alert functionality to work on AppD, you need to create a Policy that defines the criteria that you want to monitor and the action that you want to take.  
+In order for the monitor and alert functionality to work on AppDynamics, you need to create a Policy that defines the criteria that you want to monitor and the action that you want to take.  In order to do this, log into your controller and click the "Alert &amp; Respond" Tab.  Once you are on the "Alert &amp; Respond" Tab, you will want to choose your application from the drop down menu and then click "Policies".  This will take you to a list where you can edit, delete and create new policies.
 
-![Policy Creation in AppDynamics](docs/appd_policy_settings.png)
+![Breadcrumbs to the Policy Setting](doc/AppD-Spark-Policy-Breadcrumb.png)
+
+If you have not already done so, create/add a policy.
 
 The monitoring criteria can be performance metrics, health rules related to business transaction performance or specific events like a server restart.  It can really be anything you like.  For example, say some of your business transactions start slowing down to unacceptable level.  Trigger the alert!  For the sake of simplicity, I've decided to go with a simple server restart.
+
+![Policy Creation in AppDynamics](docs/appd_policy_settings.png)
 
 In order to take action with an HTTP Request, we first have to define an HTTP Request Template.  With the policy and HTTP Request defined for our case, when a server that we are monitoring restarts, the AppD controller will fire an HTTP Request to our AppD Triage Bot.
 
@@ -105,6 +109,10 @@ The resulting JSON body looks like this:
 }
 
 ```
+
+Now that we have created the HTTP Template, we need to go back into the Policy we created and assign an action.  So go back, edit your policy, select "Actions" and then add the newly created HTTP Template.
+![Adding the newly created HTTP Action to the policy](docs/AppD-Spark-Add-Action-to_policy.png)
+
 
 ## The Code
 
