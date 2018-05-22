@@ -1,22 +1,22 @@
 # AppDynamics Triage Bot
 
-Recently I've had the opportunity to get to work with the powerful tools that [AppDynamics](https://www.appdynamics.com) has to offer.  In addition to automatically and dynamically mapping out your application flow, business transaction scoring and correlation, AppDynamics has a [powerful monitoring and alert system](https://blog.appdynamics.com/product/proactive-monitoring-and-alerting-with-appdynamics/).  Like other monitoring systems you are able to send out SMS or email alerts based upon various criteria.  What is really cool is that the App D controller can fire HTTP requests at a web server!  This opens up a variety of use cases like a Cisco Spark Bot that creates a Triage Spark Room complete with pre-populating team room members, posting links and logs and other information necessary to hit the ground running in triaging the issue.
+Recently I've had the opportunity to get to work with the powerful tools that [AppDynamics](https://www.appdynamics.com) has to offer.  In addition to automatically and dynamically mapping out your application flow, business transaction scoring and correlation, AppDynamics has a [powerful monitoring and alert system](https://blog.appdynamics.com/product/proactive-monitoring-and-alerting-with-appdynamics/).  Like other monitoring systems you are able to send out SMS or email alerts based upon various criteria.  What is really cool is that the App D controller can fire HTTP requests at a web server!  This opens up a variety of use cases like a Cisco Webex Teams Bot that creates a Triage Space complete with pre-populating team space members, posting links and logs and other information necessary to hit the ground running in triaging the issue.
 
 ## Server Restart Meet Triage Bot
 
-I already have AppD monitoring a couple of my own Spark Bots, so let's setup App Dynamics and a Spark Bot to do the following in case a server I'm monitoring restarts.  Here is a high level view of the architecture.
+I already have AppD monitoring a couple of my own WebEx Team Bots, so let's setup App Dynamics and a WebEx Team Bot to do the following in case a server I'm monitoring restarts.  Here is a high level view of the architecture.
 
-![Spark-AppD-Triage Bot High Level Architecture](docs/appd-spark-architecture.png)
+![WebEx Team-AppD-Triage Bot High Level Architecture](docs/appd-spark-architecture.png)
 
 When AppD discovers a restart, I would like the following to happen:
-1. AppD send an HTTP request to a Spark Bot we'll call AppD Triage Bot.  The body of the request should include:
-   * List of team members to be added to the Spark room
+1. AppD send an HTTP request to a WebEx Teams Bot we'll call AppD Triage Bot.  The body of the request should include:
+   * List of team members to be added to the WebEx Team space
    * Issue name and description
    * Link to more information on the App D controller
 2. Upon receipt of the a valid HTTP request, the AppD Triage Bot will:
-   * Create the spark room
-   * Populate the spark room with team members
-   * Post an informative message to the spark room so that the team understands what is going on, and
+   * Create the WebEx Teams space
+   * Populate the WebEx Teams space with team members
+   * Post an informative message to the WebEx Teams space so that the team understands what is going on, and
    * Provide a deep link to more relevant information on the AppD controller.
 
 Here is a high-level view of the call flow.
@@ -41,14 +41,14 @@ In order to take action with an HTTP Request, we first have to define an HTTP Re
 
 Creating an HTTP Request Template is fairly straight forward and I'd recommend checking out the documentation for a quick primer.  The main things you will need to fill out in the form includes:
 * Name of the Template,
-* URL of the Spark Bot Web Server,
+* URL of the WebEx Teams Bot Web Server,
 * Both the "Accept" and "Content-Type" request headers,
 * Add your own customer header called **Triage-Auth-Token**.  This header is populated with a secret token that should be stored in an environmental variable on you bot server.  It is used to authenticate your webhook
 * Payload MIME Type, and
 * Payload JSON
 
-It is this HTTP Request Payload that we need to customize that will allow us to really differentiate our bot and provide a lot of context to our Spark triage room.  The body will be a JSON dictionary that will contain the following:
-* An array of team members that the bot will populate the room with, and
+It is this HTTP Request Payload that we need to customize that will allow us to really differentiate our bot and provide a lot of context to our WebEx Teams triage space.  The body will be a JSON dictionary that will contain the following:
+* An array of team members that the bot will populate the space with, and
 * An array of events that have triggered the alert HTTP Request
 
 The team members are pretty easily populated, but how do we get events?  Well, fortunately, the gurus at AppD allow scripting of the [HTTP Template Request Body](https://docs.appdynamics.com/display/PRO44/HTTP+Request+Actions+and+Templates#HTTPRequestActionsandTemplates-CreateorModifyanHTTPRequestTemplate) via [Apache Velocity](http://velocity.apache.org).  In a nutshell, the Apache Velocity Templating language allows us to populate the contents of the request body at alert time so that we have the most up to date contextual information possible.
@@ -81,7 +81,7 @@ here is the body snippet for the payload template:
 }
 ```
 
-Let's break it down.  The first dictionary entry, triageEmailList, is the list of team members we want to add to the room.  The second dictionary entry is the list of events that generated the alert.  Velocity allows us to script this into a set of key/value pairs that the Triage Bot can process and build a contextually relevant message for the triage room.  As you can see from the listing, we can provide a bunch of information including the specific application name, the name of the alert, it's severity, alert message info.  Most importantly there is a deep link provided that allows the team to immediately start looking into the issue at hand.
+Let's break it down.  The first dictionary entry, triageEmailList, is the list of team members we want to add to the space.  The second dictionary entry is the list of events that generated the alert.  Velocity allows us to script this into a set of key/value pairs that the Triage Bot can process and build a contextually relevant message for the triage space.  As you can see from the listing, we can provide a bunch of information including the specific application name, the name of the alert, it's severity, alert message info.  Most importantly there is a deep link provided that allows the team to immediately start looking into the issue at hand.
 
 When the HTTP Request is fired, the JSON body looks something like this:
 
@@ -111,12 +111,12 @@ The resulting JSON body looks like this:
 ```
 
 Now that we have created the HTTP Template, we need to go back into the Policy we created and assign an action.  So go back, edit your policy, select "Actions" and then add the newly created HTTP Template.
-![Adding the newly created HTTP Action to the policy](docs/AppD-Spark-Add-Action-to_policy.png)
 
+![Adding the newly created HTTP Action to the policy](docs/AppD-Spark-Add-Action-to_policy.png)
 
 ## The Code
 
-Now lets look at the AppD triage Bot Code.  It is a simple Python based Flask application that takes the request, parses the JSON payload, and creates the Spark room.  So lets break down the code.
+Now lets look at the AppD triage Bot Code.  It is a simple Python based Flask application that takes the request, parses the JSON payload, and creates the WebEx Teams space.  So lets break down the code.
 
 The first part is standard [Flask](http://flask.pocoo.org) stuff:
 
@@ -138,10 +138,10 @@ if __name__ == "__main__":
     app.run(host='0.0.0.0')
 ```
 
-pretty simple.  We take the HTTP request, verify it's coming from our AppD controller via a token embedded in the request and then fire a function, build_triage_room, that takes the request payload and builds the room.  We will do the following:
-1. Create the Spark Space with an appropriate name.
-2. Populate the room with people listed in the *triageEmailList* json array in the request payload above, and
-3. Send a summary of the event that needs triaging to the room.  We will want to include an HTML deep link back to the event so that users can dive right in and start troubleshooting.  
+pretty simple.  We take the HTTP request, verify it's coming from our AppD controller via a token embedded in the request and then fire a function, build_triage_room, that takes the request payload and builds the space.  We will do the following:
+1. Create the WebEx Teams Space with an appropriate name.
+2. Populate the space with people listed in the *triageEmailList* JSON array in the request payload above, and
+3. Send a summary of the event that needs triaging to the space.  We will want to include an HTML deep link back to the event so that users can dive right in and start troubleshooting.  
 
 Now let's take a look at how we do this in code:
 
@@ -152,7 +152,7 @@ def build_triage_room(appd_request_json):
     date_time = dt.datetime.now()
     print("{}, build_triage_room start".format(date_time))
 
-    # Get the event from the request json
+    # Get the event from the request JSON
     event = appd_request_json['events'][0]
 
     # Get the app name from the event
@@ -209,4 +209,4 @@ def build_triage_room(appd_request_json):
 To test it out, we need to trigger a restart of the server and generate traffic to the app that is being monitored.  Once AppD starts processing those business transations, it will fire the HTTP request to our triage bot.
 
 Here is a screenshot of the finished product!
-![Spark Bot created triage room](docs/spark_screenshot.png)
+![WebEx Teams Bot created triage space](docs/spark_screenshot.png)
